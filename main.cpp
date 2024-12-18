@@ -1,6 +1,5 @@
 #include <iostream>
 #include <string>
-#include <ctime>
 #include <fstream>
 using namespace std;
 
@@ -43,6 +42,8 @@ int prioritasTugasKeInt(string prioritas)
 string intKePrioritasTugas(int prioritas)
 {
     string daftarPrioritas[3] = {"Tinggi", "Sedang", "Rendah"};
+    if (prioritas < 1 || prioritas > 3)
+        return "Tidak Diketahui";
     return daftarPrioritas[prioritas - 1];
 }
 
@@ -196,14 +197,14 @@ bool cekNumerik(string str)
 }
 
 // Fungsi untuk mengecek apakah pilihan ada pada opsi
-bool cekPilihan(string pilihan, int jumlahOpsi)
+bool cekPilihan(string pilihan, int opsiMin, int opsiMax)
 {
     if (!cekNumerik(pilihan))
         return false;
 
     int pil = stoi(pilihan);
 
-    return (pil > 0 && pil <= jumlahOpsi);
+    return (pil >= opsiMin && pil <= opsiMax);
 }
 
 // Fungsi untuk mencari index sebuah tugas berdasarkan ID tugas
@@ -293,8 +294,8 @@ void simpanData(Tugas *daftarTugas, int jumlahTugas)
         temp += daftarTugas[i].namaTugas + "|";
         temp += daftarTugas[i].mataKuliah + "|";
         temp += daftarTugas[i].tenggatWaktu + "|";
-        temp += to_string(daftarTugas[i].prioritas) + "|";
-        temp += to_string(daftarTugas[i].selesai) + "\n";
+        temp += intKePrioritasTugas(daftarTugas[i].prioritas) + "|";
+        temp += boolKeStatusTugas(daftarTugas[i].selesai) + "\n";
         data += temp;
     }
 
@@ -307,7 +308,6 @@ bool inputLegal(string input)
     return (input.find('|') == string::npos);
 }
 
-// Vasya
 void tambahTugas()
 {
     string idTugas, namaTugas, matkul, tenggat, prioritas, selesai;
@@ -366,9 +366,9 @@ void tambahTugas()
     {
         cout << "input prioritas (1:tinggi/2:sedang/3:rendah): ";
         getline(cin, prioritas);
-        int jumlahOpsi = 3;
+        int opsiMin = 1, opsiMax = 3;
 
-        if (!cekPilihan(prioritas, jumlahOpsi))
+        if (!cekPilihan(prioritas, opsiMin, opsiMax))
         {
             cout << "Pilihan tidak valid!" << endl;
             continue;
@@ -394,12 +394,129 @@ void tambahTugas()
          << endl;
 }
 
-// Vasya
-// Fungsi untuk menampilkan daftar tugas dalam format tabel
-void lihatDaftarTugas()
+// Fungsi untuk menyortir array Tugas berdasarkan ID
+void sortirTugasBerdasarkanID(Tugas *daftarTugas, int jumlahTugas)
 {
-    Tugas *daftarTugas = muatData();
-    int jumlahTugas = hitungBarisFile("data.txt");
+    // Bubble Sort untuk menyortir berdasarkan ID
+    for (int i = 0; i < jumlahTugas - 1; i++)
+    {
+        for (int j = 0; j < jumlahTugas - i - 1; j++)
+        {
+            if (daftarTugas[j].idTugas > daftarTugas[j + 1].idTugas)
+            {
+                // Tukar elemen jika ID j lebih besar daripada j+1
+                Tugas temp = daftarTugas[j];
+                daftarTugas[j] = daftarTugas[j + 1];
+                daftarTugas[j + 1] = temp;
+            }
+        }
+    }
+}
+
+// Fungsi untuk memecah string tanggal menjadi hari, bulan, dan tahun
+void pecahTanggal(const string tanggal, int &hari, int &bulan, int &tahun)
+{
+    hari = stoi(tanggal.substr(0, 2));  // Ambil DD
+    bulan = stoi(tanggal.substr(3, 2)); // Ambil MM
+    tahun = stoi(tanggal.substr(6, 4)); // Ambil YYYY
+}
+
+// Fungsi untuk membandingkan dua tanggal dalam format DD/MM/YYYY
+bool tglLebihAwal(const string tanggal1, const string tanggal2)
+{
+    int hari1, bulan1, tahun1;
+    int hari2, bulan2, tahun2;
+
+    // Pecah kedua tanggal menjadi komponen hari, bulan, dan tahun
+    pecahTanggal(tanggal1, hari1, bulan1, tahun1);
+    pecahTanggal(tanggal2, hari2, bulan2, tahun2);
+
+    // Perbandingan hierarkis
+    if (tahun1 != tahun2)
+    {
+        return tahun1 < tahun2; // Tahun lebih kecil lebih awal
+    }
+    else if (bulan1 != bulan2)
+    {
+        return bulan1 < bulan2; // Bulan lebih kecil lebih awal
+    }
+    else
+    {
+        return hari1 < hari2; // Hari lebih kecil lebih awal
+    }
+}
+
+// Fungsi untuk menyortir array Tugas berdasarkan tenggat waktu
+void sortirTugasBerdasarkanTanggal(Tugas *daftarTugas, int jumlahTugas)
+{
+    // Bubble Sort untuk menyortir berdasarkan tanggal
+    for (int i = 0; i < jumlahTugas - 1; i++)
+    {
+        for (int j = 0; j < jumlahTugas - i - 1; j++)
+        {
+            if (!tglLebihAwal(daftarTugas[j].tenggatWaktu, daftarTugas[j + 1].tenggatWaktu))
+            {
+                // Tukar elemen jika tanggal j lebih lambat daripada j+1
+                Tugas temp = daftarTugas[j];
+                daftarTugas[j] = daftarTugas[j + 1];
+                daftarTugas[j + 1] = temp;
+            }
+        }
+    }
+}
+
+// Fungsi untuk menyortir array Tugas berdasarkan prioritas
+void sortirTugasBerdasarkanPrioritas(Tugas *daftarTugas, int jumlahTugas)
+{
+    // Bubble Sort untuk menyortir berdasarkan prioritas
+    for (int i = 0; i < jumlahTugas - 1; i++)
+    {
+        for (int j = 0; j < jumlahTugas - i - 1; j++)
+        {
+            if (daftarTugas[j].prioritas > daftarTugas[j + 1].prioritas)
+            {
+                // Tukar elemen jika prioritas j lebih besar daripada j+1
+                Tugas temp = daftarTugas[j];
+                daftarTugas[j] = daftarTugas[j + 1];
+                daftarTugas[j + 1] = temp;
+            }
+        }
+    }
+}
+
+void sortirTugas(Tugas *daftarTugas, int jumlahTugas, int sortir)
+{
+    switch (sortir)
+    {
+    case 1:
+        sortirTugasBerdasarkanID(daftarTugas, jumlahTugas);
+        break;
+    case 2:
+        sortirTugasBerdasarkanTanggal(daftarTugas, jumlahTugas);
+        break;
+    case 3:
+        sortirTugasBerdasarkanPrioritas(daftarTugas, jumlahTugas);
+        break;
+    }
+}
+
+void menuSortirTugas(int sortir)
+{
+    cout << "Sortir tugas berdasarkan:" << endl
+         << "1. ID (default)" << endl
+         << "2. Tenggat Waktu" << endl
+         << "3. Prioritas" << endl
+         << "Pilihan saat ini: " << sortir << endl
+         << endl
+         << "Pilih 0 untuk kembali ke menu utama" << endl
+         << endl
+         << "Pilih opsi (1/2/3/0): ";
+}
+
+void tabelTugas(Tugas *daftarTugas, int jumlahTugas, int sortir = 1)
+{
+    // Sortir urutan tugas sebelum ditampilkan
+    sortirTugas(daftarTugas, jumlahTugas, sortir);
 
     // Header tabel
     cout << tambahkanSpasi("ID", 5)
@@ -425,13 +542,200 @@ void lihatDaftarTugas()
     cout << endl;
 }
 
-// Hilmi
+void tabelSatuTugas(Tugas *daftarTugas, int indexTugas)
+{
+    int jumlahTugas = 1;
+    Tugas daftarTugasBaru[jumlahTugas] = {
+        {
+            daftarTugas[indexTugas].idTugas,
+            daftarTugas[indexTugas].namaTugas,
+            daftarTugas[indexTugas].mataKuliah,
+            daftarTugas[indexTugas].tenggatWaktu,
+            daftarTugas[indexTugas].prioritas,
+            daftarTugas[indexTugas].selesai,
+        }};
+
+    tabelTugas(daftarTugasBaru, jumlahTugas);
+}
+
+// Fungsi untuk menampilkan daftar tugas dalam format tabel
+void lihatDaftarTugas()
+{
+    Tugas *daftarTugas = muatData();
+    int jumlahTugas = hitungBarisFile("data.txt");
+    int pilihan, opsiMin = 0, opsiMax = 3;
+    string pilihanStr;
+    bool pilihanValid;
+
+    /*
+    sortir = 1 --> Sortir berdasarkan ID (default)
+    sortir = 2 --> Sortir berdasarkan tenggat waktu
+    sortir = 3 --> Sortir berdasarkan prioritas
+     */
+    int sortir = 1;
+    while (true)
+    {
+        tabelTugas(daftarTugas, jumlahTugas, sortir);
+        menuSortirTugas(sortir);
+        getline(cin, pilihanStr);
+        pilihanValid = cekPilihan(pilihanStr, opsiMin, opsiMax);
+
+        if (!pilihanValid)
+        {
+            cout << "Nomor pilihan " << pilihanStr << " tidak ada pada opsi, mohon pilih ulang!" << endl;
+            continue;
+        }
+
+        pilihan = stoi(pilihanStr);
+
+        if (pilihan == 0)
+            break;
+
+        sortir = pilihan;
+    }
+}
+
+void menuUbahIsiTugas()
+{
+    cout << "Pilih yang ingin diubah: " << endl
+         << "1. Nama Tugas" << endl
+         << "2. Mata Kuliah" << endl
+         << "3. Tenggat Waktu" << endl
+         << "4. Prioritas" << endl
+         << endl
+         << "Pilih 0 untuk membatalkan dan kembali ke menu utama" << endl
+         << endl
+         << "Pilih opsi (1/2/3/4/0): ";
+}
+
+void ubahIsiTugas(Tugas *daftarTugas, int indexTugas, int pilihan)
+{
+    string daftarInstruksi[4] = {
+        "Masukkan nama tugas baru",
+        "Masukkan mata kuliah baru",
+        "Masukkan tenggat waktu baru (DD/MM/YYYY)",
+        "Masukkan prioritas baru (1:tinggi/2:sedang/3:rendah)",
+    };
+    string input;
+    bool loop = true;
+
+    while (loop)
+    {
+        cout << daftarInstruksi[pilihan - 1];
+        cout << " (kosongi untuk membatalkan): ";
+        getline(cin, input);
+        cout << endl;
+
+        if (empty(input))
+        {
+            cout << "Edit tugas berhasil dibatalkan!" << endl;
+            break;
+        };
+
+        switch (pilihan)
+        {
+        case 1:
+            if (!inputLegal(input))
+            {
+                cout << "Teks tidak boleh mengandung karakter \"|\"" << endl;
+                break;
+            }
+            daftarTugas[indexTugas].namaTugas = input;
+            loop = false;
+            break;
+        case 2:
+            if (!inputLegal(input))
+            {
+                cout << "Teks tidak boleh mengandung karakter \"|\"" << endl;
+                break;
+            }
+            daftarTugas[indexTugas].mataKuliah = input;
+            loop = false;
+            break;
+        case 3:
+            if (!formatTanggalValid(input))
+            {
+                cout << "Format tanggal tidak valid!" << endl;
+                break;
+            }
+            daftarTugas[indexTugas].tenggatWaktu = input;
+            loop = false;
+            break;
+        case 4:
+            int opsiMin = 1, opsiMax = 3;
+            if (!cekPilihan(input, opsiMin, opsiMax))
+            {
+                cout << "Pilihan " << input << " tidak ada pada opsi!" << endl;
+                break;
+            }
+            daftarTugas[indexTugas].prioritas = stoi(input);
+            loop = false;
+            break;
+        }
+    }
+}
+
 void editTugas()
 {
+    int idTugas, jumlahTugas, indexTugas, pilihan, opsiPilihanMin = 0, opsiPilihanMax = 4;
+    string idTugasStr, pilihanStr;
+    bool idTugasValid, pilihanValid;
+    Tugas *daftarTugas;
+
+    while (true)
+    {
+        cout << "Masukkan ID tugas: ";
+        getline(cin, idTugasStr);
+        idTugasValid = cekNumerik(idTugasStr);
+
+        if (!idTugasValid)
+        {
+            cout << "ID tugas tidak valid, mohon masukkan ulang!" << endl;
+            continue;
+        }
+
+        idTugas = stoi(idTugasStr);
+        daftarTugas = muatData();
+        jumlahTugas = hitungBarisFile("data.txt");
+        indexTugas = cariIndexTugas(daftarTugas, jumlahTugas, idTugas);
+
+        if (indexTugas == -1)
+        {
+            cout << "Tugas dengan ID " << idTugas << " tidak ditemukan!" << endl;
+            continue;
+        }
+
+        break;
+    }
+
+    tabelSatuTugas(daftarTugas, indexTugas);
+
+    while (true)
+    {
+        menuUbahIsiTugas();
+        getline(cin, pilihanStr);
+        pilihanValid = cekPilihan(pilihanStr, opsiPilihanMin, opsiPilihanMax);
+
+        if (!pilihanValid)
+        {
+            cout << "Pilihan " << pilihanStr << " tidak ada pada opsi!" << endl;
+            continue;
+        }
+
+        pilihan = stoi(pilihanStr);
+        break;
+    }
+
+    if (pilihan != 0)
+    {
+        ubahIsiTugas(daftarTugas, indexTugas, pilihan);
+        simpanData(daftarTugas, jumlahTugas);
+        cout << "Tugas dengan ID " << idTugas << " berhasil diedit!" << endl;
+    }
 }
 
 // Fungsi untuk menghapus elemen dari array berdasarkan indeks
-void hapusTugasByIndex(Tugas *daftarTugas, int jumlahTugas, int index)
+void hapusTugasByIndex(Tugas *daftarTugas, int &jumlahTugas, int index)
 {
     // Geser elemen setelah indeks ke depan agar elemen pada indeks tertimpa
     for (int i = index; i < jumlahTugas - 1; i++)
@@ -483,7 +787,7 @@ void hapusTugas()
         if (konfirmasi == "YA")
         {
             hapusTugasByIndex(daftarTugas, jumlahTugas, indexTugas);
-            simpanData(daftarTugas, jumlahTugas - 1);
+            simpanData(daftarTugas, jumlahTugas);
             cout << "Tugas berhasil dihapus!" << endl;
         }
         else
@@ -497,8 +801,40 @@ void hapusTugas()
     }
 }
 
-// Hilmi
-void tandaiSelesai() {}
+void tandaiSelesai()
+{
+    int idTugas, indexTugas, jumlahTugas;
+    bool selesai;
+    string idTugasStr;
+    Tugas *daftarTugas;
+
+    while (true)
+    {
+        cout << "Masukkan ID tugas: ";
+        getline(cin, idTugasStr);
+        if (!cekNumerik(idTugasStr))
+        {
+            cout << "ID tugas tidak valid!" << endl;
+            continue;
+        }
+        idTugas = stoi(idTugasStr);
+        daftarTugas = muatData();
+        jumlahTugas = hitungBarisFile("data.txt");
+        indexTugas = cariIndexTugas(daftarTugas, jumlahTugas, idTugas);
+
+        if (indexTugas == -1)
+        {
+            cout << "Tugas dengan ID " << idTugas << " tidak ditemukan!" << endl;
+            continue;
+        }
+        break;
+    }
+    selesai = !(daftarTugas[indexTugas].selesai);
+    daftarTugas[indexTugas].selesai = selesai;
+    simpanData(daftarTugas, jumlahTugas);
+
+    cout << "Status tugas dengan ID " << idTugas << " berhasil diubah menjadi " << boolKeStatusTugas(selesai) << "!" << endl;
+}
 
 void simpanDanKeluar()
 {
@@ -506,47 +842,61 @@ void simpanDanKeluar()
     cout << "Terima kasih telah menggunakan program Pengelolaan Tugas Kuliah!" << endl;
 }
 
-void pesanPilihanError(int &pilihan)
+void pesanPilihanError(int pilihan)
 {
     cout << "Error: Nomor " << pilihan << " tidak ada pada opsi, mohon pilih ulang!" << endl;
 }
 
-int main()
+void mulai()
 {
-    string pilihanStr;
     int pilihan;
+    string pilihanStr;
 
-    do
+    while (true)
     {
         menuUtama();
         getline(cin, pilihanStr);
-        pilihan = stoi(pilihanStr); // stoi = string to integer
-
-        switch (pilihan)
+        if (!cekNumerik(pilihanStr))
         {
-        case 1:
-            tambahTugas();
-            break;
-        case 2:
-            lihatDaftarTugas();
-            break;
-        case 3:
-            editTugas();
-            break;
-        case 4:
-            hapusTugas();
-            break;
-        case 5:
-            tandaiSelesai();
-            break;
-        case 6:
-            simpanDanKeluar();
-            break;
-        default:
-            pesanPilihanError(pilihan);
-            break;
+            cout << "Pilihan harus berupa bilangan bulat!" << endl
+                 << endl;
+            continue;
         }
-    } while (pilihan != 6);
+        pilihan = stoi(pilihanStr); // stoi = string to integer
+        break;
+    }
 
+    switch (pilihan)
+    {
+    case 1:
+        tambahTugas();
+        break;
+    case 2:
+        lihatDaftarTugas();
+        break;
+    case 3:
+        editTugas();
+        break;
+    case 4:
+        hapusTugas();
+        break;
+    case 5:
+        tandaiSelesai();
+        break;
+    case 6:
+        simpanDanKeluar();
+        break;
+    default:
+        pesanPilihanError(pilihan);
+        break;
+    }
+
+    if (pilihan != 6)
+        mulai();
+}
+
+int main()
+{
+    mulai();
     return 0;
 }
