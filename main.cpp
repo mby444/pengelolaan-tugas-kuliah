@@ -18,6 +18,7 @@ struct Tugas
 /* Begin Fungsi Pembantu */
 
 // Fungsi untuk mengubah string prioritas ("Tinggi", "Sedang", "Rendah") menjadi nilai integer (1, 2, 3)
+// Dijelaskan oleh: Vasya
 int prioritasTugasKeInt(string prioritas)
 {
     if (prioritas == "Tinggi")
@@ -39,21 +40,24 @@ int prioritasTugasKeInt(string prioritas)
 }
 
 // Fungsi untuk mengubah nilai integer prioritas menjadi string prioritas
+// Dijelaskan oleh: Vasya
 string intKePrioritasTugas(int prioritas)
 {
     string daftarPrioritas[3] = {"Tinggi", "Sedang", "Rendah"};
     if (prioritas < 1 || prioritas > 3)
-        return "Tidak Diketahui";
+        return "Tidak Ada";
     return daftarPrioritas[prioritas - 1];
 }
 
 // Fungsi untuk mengubah string status tugas menjadi boolean
+// Dijelaskan oleh: Vasya
 bool statusTugasKeBool(string status)
 {
     return (status == "Selesai");
 }
 
 // Fungsi untuk mengubah boolean status tugas menjadi string
+// Dijelaskan oleh: Vasya
 string boolKeStatusTugas(bool selesai)
 {
     if (selesai)
@@ -62,6 +66,7 @@ string boolKeStatusTugas(bool selesai)
 }
 
 // Fungsi untuk mengecek apakah string hanya berisi angka (numerik)
+// Dijelaskan oleh: Bima
 bool cekNumerik(string str)
 {
     // Jika string kosong, tidak valid
@@ -83,6 +88,7 @@ bool cekNumerik(string str)
 
 // Fungsi untuk memisahkan string berdasarkan karakter pemisah '|'
 // Contoh: "1|b|c|d|Tinggi|Belum Selesai" diubah menjadi {"1", "b", "c", "d", "Tinggi", "Belum Selesai"}
+// Dijelaskan oleh: Bima
 void lineKeArray(string line, string *arr)
 {
     int insertIndex = 0;
@@ -106,6 +112,7 @@ void lineKeArray(string line, string *arr)
 }
 
 // Fungsi untuk mengubah array string menjadi struct Tugas
+// Dijelaskan oleh: Hilmi
 void arrayKeStruct(string *arr, Tugas &tugas)
 {
     tugas.idTugas = stoi(arr[0]); // stoi = string to integer
@@ -117,6 +124,7 @@ void arrayKeStruct(string *arr, Tugas &tugas)
 }
 
 // Fungsi untuk menghitung jumlah baris dalam file
+// Dijelaskan oleh: Hilmi
 int hitungBarisFile(const string namaFile)
 {
     ifstream fileData(namaFile);
@@ -134,6 +142,7 @@ int hitungBarisFile(const string namaFile)
 }
 
 // Fungsi untuk mengecek apakah string adalah format tanggal valid (DD/MM/YYYY)
+// Dijelaskan oleh: Bima
 bool formatTanggalValid(string tgl)
 {
     // Panjang string harus 10 (DD/MM/YYYY)
@@ -198,6 +207,7 @@ bool formatTanggalValid(string tgl)
 }
 
 // Fungsi untuk mengecek apakah pilihan berada dalam rentang opsi yang valid
+// Dijelaskan oleh: Hilmi
 bool cekPilihan(string pilihan, int opsiMin, int opsiMax)
 {
     if (!cekNumerik(pilihan))
@@ -209,6 +219,7 @@ bool cekPilihan(string pilihan, int opsiMin, int opsiMax)
 }
 
 // Fungsi untuk mencari index sebuah tugas berdasarkan ID tugas
+// Dijelaskan oleh: Bima
 int cariIndexTugas(Tugas *daftarTugas, int jumlahTugas, int idTugas)
 {
     for (int i = 0; i < jumlahTugas; i++)
@@ -222,6 +233,7 @@ int cariIndexTugas(Tugas *daftarTugas, int jumlahTugas, int idTugas)
 }
 
 // Fungsi untuk menambahkan spasi agar teks sesuai dengan lebar kolom tabel
+// Dijelaskan oleh: Bima
 string tambahkanSpasi(string teks, int lebar)
 {
     string hasil = teks;
@@ -233,6 +245,7 @@ string tambahkanSpasi(string teks, int lebar)
 }
 
 // Fungsi untuk mengecek apakah jumlah karakter "|" sesuai
+// Dijelaskan oleh: Bima
 bool lineValid(string line)
 {
     int separatorCount = 0;
@@ -246,6 +259,8 @@ bool lineValid(string line)
     return (separatorCount == JML_KOLOM - 1);
 }
 
+// Fungsi untuk memuat data pada file menjadi array of struct Tugas
+// Dijelaskan oleh: Bima
 Tugas *muatData(bool *dataKorup)
 {
     // Membuka file dan deklarasi variabel
@@ -265,6 +280,7 @@ Tugas *muatData(bool *dataKorup)
         if (!lineValid(line))
         {
             *dataKorup = true;
+            return nullptr; // pointer kosong
         }
         lineKeArray(line, daftarTugasStr[lineIndex]);
         lineIndex++;
@@ -285,6 +301,8 @@ Tugas *muatData(bool *dataKorup)
     return daftarTugas;
 }
 
+// Fungsi untuk menyimpan semua tugas ke dalam file
+// Dijelaskan oleh: Vasya
 void simpanData(Tugas *daftarTugas, int jumlahTugas)
 {
     ofstream fileData("data.txt");
@@ -306,12 +324,14 @@ void simpanData(Tugas *daftarTugas, int jumlahTugas)
 }
 
 // Fungsi untuk mengecek apakah suatu string legal atau tidak terdapat karakter "|"
+// Dijelaskan oleh: Bima
 bool inputLegal(string input)
 {
     return (input.find('|') == string::npos);
 }
 
 // Fungsi untuk menyortir array Tugas berdasarkan ID
+// Dijelaskan oleh: Bima
 void sortirTugasBerdasarkanID(Tugas *daftarTugas, int jumlahTugas)
 {
     // Bubble Sort untuk menyortir berdasarkan ID
@@ -331,6 +351,7 @@ void sortirTugasBerdasarkanID(Tugas *daftarTugas, int jumlahTugas)
 }
 
 // Fungsi untuk memecah string tanggal menjadi hari, bulan, dan tahun
+// Dijelaskan oleh: Hilmi
 void pecahTanggal(const string tanggal, int &hari, int &bulan, int &tahun)
 {
     hari = stoi(tanggal.substr(0, 2));  // Ambil DD
@@ -339,6 +360,7 @@ void pecahTanggal(const string tanggal, int &hari, int &bulan, int &tahun)
 }
 
 // Fungsi untuk membandingkan dua tanggal dalam format DD/MM/YYYY
+// Dijelaskan oleh: Hilmi
 bool tglLebihAwal(const string tanggal1, const string tanggal2)
 {
     int hari1, bulan1, tahun1;
@@ -364,6 +386,7 @@ bool tglLebihAwal(const string tanggal1, const string tanggal2)
 }
 
 // Fungsi untuk menyortir array Tugas berdasarkan tenggat waktu
+// Dijelaskan oleh: Bima
 void sortirTugasBerdasarkanTanggal(Tugas *daftarTugas, int jumlahTugas)
 {
     // Bubble Sort untuk menyortir berdasarkan tanggal
@@ -383,6 +406,7 @@ void sortirTugasBerdasarkanTanggal(Tugas *daftarTugas, int jumlahTugas)
 }
 
 // Fungsi untuk menyortir array Tugas berdasarkan prioritas
+// Dijelaskan oleh: Bima
 void sortirTugasBerdasarkanPrioritas(Tugas *daftarTugas, int jumlahTugas)
 {
     // Bubble Sort untuk menyortir berdasarkan prioritas
@@ -401,6 +425,8 @@ void sortirTugasBerdasarkanPrioritas(Tugas *daftarTugas, int jumlahTugas)
     }
 }
 
+// Fungsi untuk sortir urutan tampilan tugas
+// Dijelaskan oleh: Vasya
 void sortirTugas(Tugas *daftarTugas, int jumlahTugas, int sortir)
 {
     switch (sortir)
@@ -417,6 +443,8 @@ void sortirTugas(Tugas *daftarTugas, int jumlahTugas, int sortir)
     }
 }
 
+// Fungsi untuk menampilkan tugas dalam bentuk tabel
+// Dijelaskan oleh: Hilmi
 void tabelTugas(Tugas *daftarTugas, int jumlahTugas, int sortir = 1)
 {
     // Sortir urutan tugas sebelum ditampilkan
@@ -446,6 +474,8 @@ void tabelTugas(Tugas *daftarTugas, int jumlahTugas, int sortir = 1)
     cout << endl;
 }
 
+// Fungsi untuk menampilkan satu tugas dalam bentuk tabel
+// Dijelaskan oleh: Hilmi
 void tabelSatuTugas(Tugas *daftarTugas, int indexTugas)
 {
     int jumlahTugas = 1;
@@ -463,6 +493,7 @@ void tabelSatuTugas(Tugas *daftarTugas, int indexTugas)
 }
 
 // Fungsi untuk menampilkan antarmuka
+// Dijelaskan oleh: Vasya
 void menuUtama()
 {
     cout << endl
@@ -481,6 +512,7 @@ void menuUtama()
 }
 
 // Fungsi untuk menampilkan antarmuka
+// Dijelaskan oleh: Vasya
 void menuSortirTugas(int sortir)
 {
     cout << "Sortir tugas berdasarkan:" << endl
@@ -499,6 +531,7 @@ void menuSortirTugas(int sortir)
 /* Begin Fungsi Utama */
 
 // Fungsi untuk menambahkan tugas ke dalam file
+// Dijelaskan oleh: Bima
 void tambahTugas()
 {
     string idTugas, namaTugas, matkul, tenggat, prioritas, selesai;
@@ -596,6 +629,7 @@ void tambahTugas()
 }
 
 // Fungsi untuk menampilkan daftar tugas dalam format tabel
+// Dijelaskan oleh: Vasya & Bima
 void lihatDaftarTugas(Tugas *daftarTugas)
 {
     int jumlahTugas = hitungBarisFile("data.txt");
@@ -640,6 +674,7 @@ void lihatDaftarTugas(Tugas *daftarTugas)
     }
 }
 
+// Dijelaskan oleh: Hilmi
 void menuUbahIsiTugas()
 {
     cout << "Pilih yang ingin diubah: " << endl
@@ -653,6 +688,8 @@ void menuUbahIsiTugas()
          << "Pilih opsi (1/2/3/4/0): ";
 }
 
+// Fungsi untuk mengubah isi tugas berdasarkan index
+// Dijelaskan oleh: Bima
 void ubahIsiTugas(Tugas *daftarTugas, int indexTugas, int pilihan)
 {
     string daftarInstruksi[4] = {
@@ -720,6 +757,8 @@ void ubahIsiTugas(Tugas *daftarTugas, int indexTugas, int pilihan)
     }
 }
 
+// Fungsi untuk mengedit tugas
+// Dijelaskan oleh: Bima
 void editTugas(Tugas *daftarTugas)
 {
     bool idTugasValid, pilihanValid;
@@ -788,6 +827,7 @@ void editTugas(Tugas *daftarTugas)
 }
 
 // Fungsi untuk menghapus elemen dari array berdasarkan indeks
+// Dijelaskan oleh: Bima
 void hapusTugasByIndex(Tugas *daftarTugas, int &jumlahTugas, int index)
 {
     // Geser elemen setelah indeks ke depan agar elemen pada indeks tertimpa
@@ -806,6 +846,8 @@ void hapusTugasByIndex(Tugas *daftarTugas, int &jumlahTugas, int index)
     }
 }
 
+// Fungsi untuk menghapus tugas
+// Dijelaskan oleh: Bima
 void hapusTugas(Tugas *daftarTugas)
 {
     string idTugasStr, konfirmasi;
@@ -852,6 +894,8 @@ void hapusTugas(Tugas *daftarTugas)
     }
 }
 
+// Fungsi untuk menandai tugas selesai/belum selesai
+// Dijelaskan oleh: Bima
 void tandaiSelesai(Tugas *daftarTugas)
 {
     int idTugas, indexTugas, jumlahTugas = hitungBarisFile("data.txt");
@@ -893,17 +937,20 @@ void tandaiSelesai(Tugas *daftarTugas)
     }
 }
 
+// Dijelaskan oleh: Vasya
 void simpanDanKeluar()
 {
     cout << "Berhasil menyimpan dan keluar!" << endl;
     cout << "Terima kasih telah menggunakan program Pengelolaan Tugas Kuliah!" << endl;
 }
 
+// Dijelaskan oleh: Vasya
 void pesanPilihanError(int pilihan)
 {
     cout << "Error: Nomor " << pilihan << " tidak ada pada opsi, mohon pilih ulang!" << endl;
 }
 
+// Dijelaskan oleh: Bima
 void mulai()
 {
     bool dataKorup;
