@@ -7,9 +7,9 @@ const int JML_KOLOM = 6;
 
 struct Tugas
 {
-    int idTugas;
-    string namaTugas;
-    string mataKuliah;
+    int idTugas;         // Nomor unik untuk setiap tugas
+    string namaTugas;    // Nama tugas
+    string mataKuliah;   // Mata kuliah
     string tenggatWaktu; // Format: DD/MM/YYYY
     int prioritas;       // 1 = tinggi, 2 = sedang, 3 = rendah
     bool selesai;        // true jika selesai, false jika belum
@@ -17,7 +17,7 @@ struct Tugas
 
 /* Begin Fungsi Pembantu */
 
-// Fungsi untuk mengubah string prioritas seperti "Tinggi", "Sedang", dan "Rendah" menjadi 1, 2, dan 3
+// Fungsi untuk mengubah string prioritas ("Tinggi", "Sedang", "Rendah") menjadi nilai integer (1, 2, 3)
 int prioritasTugasKeInt(string prioritas)
 {
     if (prioritas == "Tinggi")
@@ -38,7 +38,7 @@ int prioritasTugasKeInt(string prioritas)
     }
 }
 
-// Fungsi untuk mengubah integer prioritas tugas seperti 1, 2, dan 3 menjadi "Tinggi", "Sedang", dan "Rendah"
+// Fungsi untuk mengubah nilai integer prioritas menjadi string prioritas
 string intKePrioritasTugas(int prioritas)
 {
     string daftarPrioritas[3] = {"Tinggi", "Sedang", "Rendah"};
@@ -47,12 +47,13 @@ string intKePrioritasTugas(int prioritas)
     return daftarPrioritas[prioritas - 1];
 }
 
-// Fungsi untuk mengubah status tugas menjadi boolean
+// Fungsi untuk mengubah string status tugas menjadi boolean
 bool statusTugasKeBool(string status)
 {
     return (status == "Selesai");
 }
 
+// Fungsi untuk mengubah boolean status tugas menjadi string
 string boolKeStatusTugas(bool selesai)
 {
     if (selesai)
@@ -60,7 +61,27 @@ string boolKeStatusTugas(bool selesai)
     return "Belum Selesai";
 }
 
-// Fungsi untuk mengubah string menjadi array
+// Fungsi untuk mengecek apakah string hanya berisi angka (numerik)
+bool cekNumerik(string str)
+{
+    // Jika string kosong, tidak valid
+    if (str.empty())
+        return false;
+
+    // Memeriksa setiap karakter dalam string
+    for (int i = 0; i < str.length(); i++)
+    {
+        // Karakter harus berada dalam rentang '0' hingga '9'
+        if (str[i] < '0' || str[i] > '9')
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+// Fungsi untuk memisahkan string berdasarkan karakter pemisah '|'
 // Contoh: "1|b|c|d|Tinggi|Belum Selesai" diubah menjadi {"1", "b", "c", "d", "Tinggi", "Belum Selesai"}
 void lineKeArray(string line, string *arr)
 {
@@ -84,16 +105,7 @@ void lineKeArray(string line, string *arr)
     arr[insertIndex] = temp;
 }
 
-// Fungsi yang mengubah array menjadi struct
-// Contoh: {"1", "Project", "Pemrograman Dasar", "24/12/2024", "Tinggi", "Belum Selesai"} diubah menjadi
-// {
-//     int idTugas = 1;
-//     string namaTugas = "Project";
-//     string mataKuliah = "Pemrograman Dasar";
-//     string tenggatWaktu = "23/12/2024";
-//     int prioritas = 1;
-//     bool selesai = false;
-// };
+// Fungsi untuk mengubah array string menjadi struct Tugas
 void arrayKeStruct(string *arr, Tugas &tugas)
 {
     tugas.idTugas = stoi(arr[0]); // stoi = string to integer
@@ -104,14 +116,14 @@ void arrayKeStruct(string *arr, Tugas &tugas)
     tugas.selesai = statusTugasKeBool(arr[5]);
 }
 
-// Fungsi yang menghitung jumlah baris file
+// Fungsi untuk menghitung jumlah baris dalam file
 int hitungBarisFile(const string namaFile)
 {
     ifstream fileData(namaFile);
     int jumlahBaris = 0;
     string line;
 
-    // Menghitung jumlah baris pada file
+    // Menghitung jumlah baris dalam file
     while (getline(fileData, line))
     {
         jumlahBaris++;
@@ -121,7 +133,7 @@ int hitungBarisFile(const string namaFile)
     return jumlahBaris;
 }
 
-// Fungsi untuk mengecek apakah sebuah string adalah format tanggal yang valid (DD/MM/YYYY)
+// Fungsi untuk mengecek apakah string adalah format tanggal valid (DD/MM/YYYY)
 bool formatTanggalValid(string tgl)
 {
     // Panjang string harus 10 (DD/MM/YYYY)
@@ -132,14 +144,24 @@ bool formatTanggalValid(string tgl)
     if (tgl[2] != '/' || tgl[5] != '/')
         return false;
 
-    // Mengubah bagian string menjadi integer
-    int hari = stoi(tgl.substr(0, 2));  // DD
-    int bulan = stoi(tgl.substr(3, 2)); // MM
-    int tahun = stoi(tgl.substr(6, 4)); // YYYY
+    // Menyimpan string hari, bulan, dan tahun
+    string hariStr = tgl.substr(0, 2);  // DD
+    string bulanStr = tgl.substr(3, 2); // MM
+    string tahunStr = tgl.substr(6, 4); // YYYY
 
-    // Jika ada kesalahan konversi (return -1), maka format tidak valid
-    if (hari == -1 || bulan == -1 || tahun == -1)
+    // Menyimpan boolean true apabila isinya numerik, false jika bukan numerik
+    bool hariNumerik = cekNumerik(hariStr);
+    bool bulanNumerik = cekNumerik(bulanStr);
+    bool tahunNumerik = cekNumerik(tahunStr);
+
+    // Mengecek apakah semuanya numerik
+    if (!hariNumerik || !bulanNumerik || !tahunNumerik)
         return false;
+
+    // Mengubah bagian string menjadi integer
+    int hari = stoi(hariStr);   // DD
+    int bulan = stoi(bulanStr); // MM
+    int tahun = stoi(tahunStr); // YYYY
 
     // Memeriksa validitas bulan
     if (bulan < 1 || bulan > 12)
@@ -175,28 +197,7 @@ bool formatTanggalValid(string tgl)
     return true;
 }
 
-// Fungsi yang mengecek apakah string merupakan numerik
-// Fungsi untuk mengecek apakah string adalah numerik
-bool cekNumerik(string str)
-{
-    // Jika string kosong, tidak valid
-    if (str.empty())
-        return false;
-
-    // Memeriksa setiap karakter dalam string
-    for (int i = 0; i < str.length(); i++)
-    {
-        // Karakter harus berada dalam rentang '0' hingga '9'
-        if (str[i] < '0' || str[i] > '9')
-        {
-            return false;
-        }
-    }
-
-    return true;
-}
-
-// Fungsi untuk mengecek apakah pilihan ada pada opsi
+// Fungsi untuk mengecek apakah pilihan berada dalam rentang opsi yang valid
 bool cekPilihan(string pilihan, int opsiMin, int opsiMax)
 {
     if (!cekNumerik(pilihan))
@@ -231,29 +232,26 @@ string tambahkanSpasi(string teks, int lebar)
     return hasil;
 }
 
-/* End Fungsi Pembantu */
-
-void menuUtama()
+// Fungsi untuk mengecek apakah jumlah karakter "|" sesuai
+bool lineValid(string line)
 {
-    cout << "########################################" << endl
-         << "###     PENGELOLAAN TUGAS KULIAH     ###" << endl
-         << "########################################" << endl
-         << endl
-         << "1. Tambah Tugas" << endl
-         << "2. Lihat Daftar Tugas" << endl
-         << "3. Edit Tugas" << endl
-         << "4. Hapus Tugas" << endl
-         << "5. Tandai Tugas Selesai" << endl
-         << "6. Simpan dan Keluar" << endl
-         << endl
-         << "Pilih opsi (1-6): ";
+    int separatorCount = 0;
+
+    for (int i = 0; i < line.size(); i++)
+    {
+        if (line[i] == '|')
+            separatorCount++;
+    }
+
+    return (separatorCount == JML_KOLOM - 1);
 }
 
-Tugas *muatData()
+Tugas *muatData(bool *dataKorup)
 {
     // Membuka file dan deklarasi variabel
     ifstream fileData("data.txt");
     int panjangArr = hitungBarisFile("data.txt");
+    Tugas *daftarTugas;
     string line;
 
     // Array 2D yang akan diisi daftar tugas
@@ -263,12 +261,17 @@ Tugas *muatData()
     int lineIndex = 0;
     while (getline(fileData, line))
     {
+        // Apabila jumlah karakter "|" tidak sesuai maka dataKorup menjadi true
+        if (!lineValid(line))
+        {
+            *dataKorup = true;
+        }
         lineKeArray(line, daftarTugasStr[lineIndex]);
         lineIndex++;
     }
 
     // Array yang akan diisi struct Tugas
-    Tugas *daftarTugas = new Tugas[panjangArr];
+    daftarTugas = new Tugas[panjangArr];
 
     // Mengisi array daftarTugas dari array daftarTugasStr yang telah diubah menjadi array of struct Tugas
     for (int i = 0; i < panjangArr; i++)
@@ -306,92 +309,6 @@ void simpanData(Tugas *daftarTugas, int jumlahTugas)
 bool inputLegal(string input)
 {
     return (input.find('|') == string::npos);
-}
-
-void tambahTugas()
-{
-    string idTugas, namaTugas, matkul, tenggat, prioritas, selesai;
-
-    // input nama tugas
-    while (true)
-    {
-        cout << "input nama tugas: ";
-        getline(cin, namaTugas);
-
-        // Apabila terdapat karakter "|" maka continue statement akan dijalankan dan loop mulai lagi dari awal
-        if (!inputLegal(namaTugas))
-        {
-            cout << "Teks tidak boleh mengandung karakter \"|\"" << endl;
-            continue;
-        }
-        break;
-    }
-
-    // input mata kuliah
-    while (true)
-    {
-        cout << "input mata kuliah: ";
-        getline(cin, matkul);
-
-        if (!inputLegal(matkul))
-        {
-            cout << "Teks tidak boleh mengandung karakter \"|\"" << endl;
-            continue;
-        }
-        break;
-    }
-
-    // input tenggat waktu
-    while (true)
-    {
-        cout << "input tenggat waktu (DD/MM/YYYY): ";
-        getline(cin, tenggat);
-
-        // Apabila terdapat karakter "|" atau format tanggal tidak valid maka continue statement akan dijalankan dan loop mulai lagi dari awal
-        if (!inputLegal(tenggat))
-        {
-            cout << "Teks tidak boleh mengandung karakter \"|\"" << endl;
-            continue;
-        }
-        if (!formatTanggalValid(tenggat))
-        {
-            cout << "Format tanggal tidak valid!" << endl;
-            continue;
-        }
-        break;
-    }
-
-    // input prioritas
-    while (true)
-    {
-        cout << "input prioritas (1:tinggi/2:sedang/3:rendah): ";
-        getline(cin, prioritas);
-        int opsiMin = 1, opsiMax = 3;
-
-        if (!cekPilihan(prioritas, opsiMin, opsiMax))
-        {
-            cout << "Pilihan tidak valid!" << endl;
-            continue;
-        }
-
-        prioritas = intKePrioritasTugas(stoi(prioritas));
-        break;
-    }
-
-    idTugas = to_string(hitungBarisFile("data.txt") + 1);
-    selesai = "Belum Selesai";
-
-    // Menggabungkan semua input menjadi satu string
-    string hasilGabung = idTugas + "|" + namaTugas + "|" + matkul + "|" + tenggat + "|" + prioritas + "|" + selesai;
-
-    // Menyimpan hasil ke file
-    ofstream fileTugas("data.txt", ios::app);
-    fileTugas << hasilGabung << endl;
-    fileTugas.close();
-
-    cout << endl
-         << "tugas berhasil ditambahkan ke dalam file!" << endl
-         << endl;
 }
 
 // Fungsi untuk menyortir array Tugas berdasarkan ID
@@ -500,19 +417,6 @@ void sortirTugas(Tugas *daftarTugas, int jumlahTugas, int sortir)
     }
 }
 
-void menuSortirTugas(int sortir)
-{
-    cout << "Sortir tugas berdasarkan:" << endl
-         << "1. ID (default)" << endl
-         << "2. Tenggat Waktu" << endl
-         << "3. Prioritas" << endl
-         << "Pilihan saat ini: " << sortir << endl
-         << endl
-         << "Pilih 0 untuk kembali ke menu utama" << endl
-         << endl
-         << "Pilih opsi (1/2/3/0): ";
-}
-
 void tabelTugas(Tugas *daftarTugas, int jumlahTugas, int sortir = 1)
 {
     // Sortir urutan tugas sebelum ditampilkan
@@ -520,23 +424,23 @@ void tabelTugas(Tugas *daftarTugas, int jumlahTugas, int sortir = 1)
 
     // Header tabel
     cout << tambahkanSpasi("ID", 5)
-         << tambahkanSpasi("Nama Tugas", 25)
-         << tambahkanSpasi("Mata Kuliah", 20)
-         << tambahkanSpasi("Tenggat Waktu", 15)
-         << tambahkanSpasi("Prioritas", 10)
-         << tambahkanSpasi("Status", 15) << endl;
+         << tambahkanSpasi("Nama Tugas", 35)
+         << tambahkanSpasi("Mata Kuliah", 25)
+         << tambahkanSpasi("Tenggat Waktu", 20)
+         << tambahkanSpasi("Prioritas", 15)
+         << tambahkanSpasi("Status", 20) << endl;
 
-    cout << string(90, '-') << endl;
+    cout << string(115, '-') << endl;
 
     // Isi tabel
     for (int i = 0; i < jumlahTugas; i++)
     {
         cout << tambahkanSpasi(to_string(daftarTugas[i].idTugas), 5)
-             << tambahkanSpasi(daftarTugas[i].namaTugas, 25)
-             << tambahkanSpasi(daftarTugas[i].mataKuliah, 20)
-             << tambahkanSpasi(daftarTugas[i].tenggatWaktu, 15)
-             << tambahkanSpasi(intKePrioritasTugas(daftarTugas[i].prioritas), 10)
-             << tambahkanSpasi(boolKeStatusTugas(daftarTugas[i].selesai), 15) << endl;
+             << tambahkanSpasi(daftarTugas[i].namaTugas, 35)
+             << tambahkanSpasi(daftarTugas[i].mataKuliah, 25)
+             << tambahkanSpasi(daftarTugas[i].tenggatWaktu, 20)
+             << tambahkanSpasi(intKePrioritasTugas(daftarTugas[i].prioritas), 15)
+             << tambahkanSpasi(boolKeStatusTugas(daftarTugas[i].selesai), 20) << endl;
     }
 
     cout << endl;
@@ -558,10 +462,142 @@ void tabelSatuTugas(Tugas *daftarTugas, int indexTugas)
     tabelTugas(daftarTugasBaru, jumlahTugas);
 }
 
-// Fungsi untuk menampilkan daftar tugas dalam format tabel
-void lihatDaftarTugas()
+// Fungsi untuk menampilkan antarmuka
+void menuUtama()
 {
-    Tugas *daftarTugas = muatData();
+    cout << endl
+         << "########################################" << endl
+         << "###     PENGELOLAAN TUGAS KULIAH     ###" << endl
+         << "########################################" << endl
+         << endl
+         << "1. Tambah Tugas" << endl
+         << "2. Lihat Daftar Tugas" << endl
+         << "3. Edit Tugas" << endl
+         << "4. Hapus Tugas" << endl
+         << "5. Tandai Tugas Selesai" << endl
+         << "6. Simpan dan Keluar" << endl
+         << endl
+         << "Pilih opsi (1-6): ";
+}
+
+// Fungsi untuk menampilkan antarmuka
+void menuSortirTugas(int sortir)
+{
+    cout << "Sortir tugas berdasarkan:" << endl
+         << "1. ID (default)" << endl
+         << "2. Tenggat Waktu" << endl
+         << "3. Prioritas" << endl
+         << "Pilihan saat ini: " << sortir << endl
+         << endl
+         << "Pilih 0 untuk kembali ke menu utama" << endl
+         << endl
+         << "Pilih opsi (1/2/3/0): ";
+}
+
+/* End Fungsi Pembantu */
+
+/* Begin Fungsi Utama */
+
+// Fungsi untuk menambahkan tugas ke dalam file
+void tambahTugas()
+{
+    string idTugas, namaTugas, matkul, tenggat, prioritas, selesai;
+
+    // input nama tugas
+    while (true)
+    {
+        cout << "Masukkan nama tugas: ";
+        getline(cin, namaTugas);
+
+        // Apabila input kosong maka continue statement akan dijalankan dan loop mulai lagi dari awal
+        if (empty(namaTugas))
+        {
+            cout << "Teks tidak boleh kosong!" << endl;
+            continue;
+        }
+        // Apabila terdapat karakter "|" maka continue statement akan dijalankan dan loop mulai lagi dari awal
+        if (!inputLegal(namaTugas))
+        {
+            cout << "Teks tidak boleh mengandung karakter \"|\"" << endl;
+            continue;
+        }
+        // Break statement untuk menghentikan loop
+        break;
+    }
+
+    // input mata kuliah
+    while (true)
+    {
+        cout << "Masukkan mata kuliah: ";
+        getline(cin, matkul);
+
+        // Cek apakah input kosong
+        if (empty(matkul))
+        {
+            cout << "Teks tidak boleh kosong!" << endl;
+            continue;
+        }
+        if (!inputLegal(matkul))
+        {
+            cout << "Teks tidak boleh mengandung karakter \"|\"" << endl;
+            continue;
+        }
+        break;
+    }
+
+    // input tenggat waktu
+    while (true)
+    {
+        cout << "Masukkan tenggat waktu (DD/MM/YYYY): ";
+        getline(cin, tenggat);
+
+        // Apabila format tanggal tidak valid maka continue statement akan dijalankan dan loop mulai lagi dari awal
+        if (!formatTanggalValid(tenggat))
+        {
+            cout << "Format tanggal tidak valid!" << endl;
+            continue;
+        }
+        break;
+    }
+
+    // input prioritas
+    while (true)
+    {
+        cout << "Masukkan prioritas (1:tinggi/2:sedang/3:rendah): ";
+        getline(cin, prioritas);
+
+        // Deklarasi rentang opsi yang dapat di-input (1-3)
+        int opsiMin = 1, opsiMax = 3;
+
+        if (!cekPilihan(prioritas, opsiMin, opsiMax))
+        {
+            cout << "Pilihan tidak valid!" << endl;
+            continue;
+        }
+
+        prioritas = intKePrioritasTugas(stoi(prioritas));
+        break;
+    }
+
+    idTugas = to_string(hitungBarisFile("data.txt") + 1);
+    selesai = "Belum Selesai";
+
+    // Menggabungkan semua input menjadi satu string
+    string hasilGabung = idTugas + "|" + namaTugas + "|" + matkul + "|" + tenggat + "|" + prioritas + "|" + selesai;
+
+    // Menyimpan hasil ke file
+    ofstream fileTugas("data.txt", ios::app);
+    fileTugas << hasilGabung << endl;
+    fileTugas.close();
+
+    cout << endl
+         << "Tugas berhasil ditambahkan!" << endl
+         << endl;
+}
+
+// Fungsi untuk menampilkan daftar tugas dalam format tabel
+void lihatDaftarTugas(Tugas *daftarTugas)
+{
     int jumlahTugas = hitungBarisFile("data.txt");
     int pilihan, opsiMin = 0, opsiMax = 3;
     string pilihanStr;
@@ -573,25 +609,34 @@ void lihatDaftarTugas()
     sortir = 3 --> Sortir berdasarkan prioritas
      */
     int sortir = 1;
-    while (true)
+    if (jumlahTugas > 0)
     {
-        tabelTugas(daftarTugas, jumlahTugas, sortir);
-        menuSortirTugas(sortir);
-        getline(cin, pilihanStr);
-        pilihanValid = cekPilihan(pilihanStr, opsiMin, opsiMax);
-
-        if (!pilihanValid)
+        while (true)
         {
-            cout << "Nomor pilihan " << pilihanStr << " tidak ada pada opsi, mohon pilih ulang!" << endl;
-            continue;
+            tabelTugas(daftarTugas, jumlahTugas, sortir);
+            menuSortirTugas(sortir);
+            getline(cin, pilihanStr);
+            pilihanValid = cekPilihan(pilihanStr, opsiMin, opsiMax);
+
+            if (!pilihanValid)
+            {
+                cout << "Nomor pilihan " << pilihanStr << " tidak ada pada opsi, mohon pilih ulang!" << endl;
+                continue;
+            }
+
+            pilihan = stoi(pilihanStr);
+
+            if (pilihan == 0)
+                break;
+
+            sortir = pilihan;
         }
-
-        pilihan = stoi(pilihanStr);
-
-        if (pilihan == 0)
-            break;
-
-        sortir = pilihan;
+    }
+    else
+    {
+        cout << endl
+             << "Daftar tugas masih kosong!" << endl
+             << endl;
     }
 }
 
@@ -675,62 +720,70 @@ void ubahIsiTugas(Tugas *daftarTugas, int indexTugas, int pilihan)
     }
 }
 
-void editTugas()
+void editTugas(Tugas *daftarTugas)
 {
-    int idTugas, jumlahTugas, indexTugas, pilihan, opsiPilihanMin = 0, opsiPilihanMax = 4;
-    string idTugasStr, pilihanStr;
     bool idTugasValid, pilihanValid;
-    Tugas *daftarTugas;
+    int idTugas, indexTugas, pilihan, opsiPilihanMin, opsiPilihanMax, jumlahTugas = hitungBarisFile("data.txt");
+    string idTugasStr, pilihanStr;
 
-    while (true)
+    if (jumlahTugas > 0)
     {
-        cout << "Masukkan ID tugas: ";
-        getline(cin, idTugasStr);
-        idTugasValid = cekNumerik(idTugasStr);
-
-        if (!idTugasValid)
+        while (true)
         {
-            cout << "ID tugas tidak valid, mohon masukkan ulang!" << endl;
-            continue;
+            cout << "Masukkan ID tugas: ";
+            getline(cin, idTugasStr);
+            idTugasValid = cekNumerik(idTugasStr);
+
+            if (!idTugasValid)
+            {
+                cout << "ID tugas tidak valid, mohon masukkan ulang!" << endl;
+                continue;
+            }
+
+            idTugas = stoi(idTugasStr);
+            indexTugas = cariIndexTugas(daftarTugas, jumlahTugas, idTugas);
+
+            if (indexTugas == -1)
+            {
+                cout << "Tugas dengan ID " << idTugas << " tidak ditemukan!" << endl;
+                continue;
+            }
+
+            break;
         }
 
-        idTugas = stoi(idTugasStr);
-        daftarTugas = muatData();
-        jumlahTugas = hitungBarisFile("data.txt");
-        indexTugas = cariIndexTugas(daftarTugas, jumlahTugas, idTugas);
+        tabelSatuTugas(daftarTugas, indexTugas);
 
-        if (indexTugas == -1)
+        while (true)
         {
-            cout << "Tugas dengan ID " << idTugas << " tidak ditemukan!" << endl;
-            continue;
+            menuUbahIsiTugas();
+            getline(cin, pilihanStr);
+            opsiPilihanMin = 0;
+            opsiPilihanMax = 4;
+            pilihanValid = cekPilihan(pilihanStr, opsiPilihanMin, opsiPilihanMax);
+
+            if (!pilihanValid)
+            {
+                cout << "Pilihan " << pilihanStr << " tidak ada pada opsi!" << endl;
+                continue;
+            }
+
+            pilihan = stoi(pilihanStr);
+            break;
         }
 
-        break;
+        if (pilihan != 0)
+        {
+            ubahIsiTugas(daftarTugas, indexTugas, pilihan);
+            simpanData(daftarTugas, jumlahTugas);
+            cout << "Tugas dengan ID " << idTugas << " berhasil diedit!" << endl;
+        }
     }
-
-    tabelSatuTugas(daftarTugas, indexTugas);
-
-    while (true)
+    else
     {
-        menuUbahIsiTugas();
-        getline(cin, pilihanStr);
-        pilihanValid = cekPilihan(pilihanStr, opsiPilihanMin, opsiPilihanMax);
-
-        if (!pilihanValid)
-        {
-            cout << "Pilihan " << pilihanStr << " tidak ada pada opsi!" << endl;
-            continue;
-        }
-
-        pilihan = stoi(pilihanStr);
-        break;
-    }
-
-    if (pilihan != 0)
-    {
-        ubahIsiTugas(daftarTugas, indexTugas, pilihan);
-        simpanData(daftarTugas, jumlahTugas);
-        cout << "Tugas dengan ID " << idTugas << " berhasil diedit!" << endl;
+        cout << endl
+             << "Daftar tugas masih kosong" << endl
+             << endl;
     }
 }
 
@@ -753,11 +806,10 @@ void hapusTugasByIndex(Tugas *daftarTugas, int &jumlahTugas, int index)
     }
 }
 
-void hapusTugas()
+void hapusTugas(Tugas *daftarTugas)
 {
     string idTugasStr, konfirmasi;
     int idTugas, indexTugas = -1, jumlahTugas = hitungBarisFile("data.txt");
-    Tugas *daftarTugas;
 
     if (jumlahTugas > 0)
     {
@@ -768,12 +820,11 @@ void hapusTugas()
 
             if (!cekNumerik(idTugasStr))
             {
-                cout << "ID tugas harus berupa bilangan bulat!" << endl;
+                cout << "ID tugas tidak valid!" << endl;
                 continue;
             }
 
             idTugas = stoi(idTugasStr);
-            daftarTugas = muatData();
             indexTugas = cariIndexTugas(daftarTugas, jumlahTugas, idTugas);
 
             if (indexTugas == -1)
@@ -801,39 +852,45 @@ void hapusTugas()
     }
 }
 
-void tandaiSelesai()
+void tandaiSelesai(Tugas *daftarTugas)
 {
-    int idTugas, indexTugas, jumlahTugas;
+    int idTugas, indexTugas, jumlahTugas = hitungBarisFile("data.txt");
     bool selesai;
     string idTugasStr;
-    Tugas *daftarTugas;
 
-    while (true)
+    if (jumlahTugas > 0)
     {
-        cout << "Masukkan ID tugas: ";
-        getline(cin, idTugasStr);
-        if (!cekNumerik(idTugasStr))
+        while (true)
         {
-            cout << "ID tugas tidak valid!" << endl;
-            continue;
-        }
-        idTugas = stoi(idTugasStr);
-        daftarTugas = muatData();
-        jumlahTugas = hitungBarisFile("data.txt");
-        indexTugas = cariIndexTugas(daftarTugas, jumlahTugas, idTugas);
+            cout << "Masukkan ID tugas: ";
+            getline(cin, idTugasStr);
+            if (!cekNumerik(idTugasStr))
+            {
+                cout << "ID tugas tidak valid!" << endl;
+                continue;
+            }
+            idTugas = stoi(idTugasStr);
+            indexTugas = cariIndexTugas(daftarTugas, jumlahTugas, idTugas);
 
-        if (indexTugas == -1)
-        {
-            cout << "Tugas dengan ID " << idTugas << " tidak ditemukan!" << endl;
-            continue;
+            if (indexTugas == -1)
+            {
+                cout << "Tugas dengan ID " << idTugas << " tidak ditemukan!" << endl;
+                continue;
+            }
+            break;
         }
-        break;
+        selesai = !(daftarTugas[indexTugas].selesai);
+        daftarTugas[indexTugas].selesai = selesai;
+        simpanData(daftarTugas, jumlahTugas);
+
+        cout << "Status tugas dengan ID " << idTugas << " berhasil diubah menjadi " << boolKeStatusTugas(selesai) << "!" << endl;
     }
-    selesai = !(daftarTugas[indexTugas].selesai);
-    daftarTugas[indexTugas].selesai = selesai;
-    simpanData(daftarTugas, jumlahTugas);
-
-    cout << "Status tugas dengan ID " << idTugas << " berhasil diubah menjadi " << boolKeStatusTugas(selesai) << "!" << endl;
+    else
+    {
+        cout << endl
+             << "Daftar tugas masih kosong" << endl
+             << endl;
+    }
 }
 
 void simpanDanKeluar()
@@ -849,51 +906,67 @@ void pesanPilihanError(int pilihan)
 
 void mulai()
 {
+    bool dataKorup;
+    Tugas *daftarTugas = muatData(&dataKorup);
     int pilihan;
     string pilihanStr;
 
-    while (true)
+    // Pastikan data tidak korup
+    if (!dataKorup)
     {
-        menuUtama();
-        getline(cin, pilihanStr);
-        if (!cekNumerik(pilihanStr))
+        while (true)
         {
-            cout << "Pilihan harus berupa bilangan bulat!" << endl
-                 << endl;
-            continue;
+            menuUtama();
+            getline(cin, pilihanStr);
+            if (!cekNumerik(pilihanStr))
+            {
+                cout << "Pilihan harus berupa bilangan bulat!" << endl
+                     << endl;
+                continue;
+            }
+            pilihan = stoi(pilihanStr); // stoi = string to integer
+            break;
         }
-        pilihan = stoi(pilihanStr); // stoi = string to integer
-        break;
-    }
 
-    switch (pilihan)
+        switch (pilihan)
+        {
+        case 1:
+            tambahTugas();
+            break;
+        case 2:
+            lihatDaftarTugas(daftarTugas);
+            break;
+        case 3:
+            editTugas(daftarTugas);
+            break;
+        case 4:
+            hapusTugas(daftarTugas);
+            break;
+        case 5:
+            tandaiSelesai(daftarTugas);
+            break;
+        case 6:
+            simpanDanKeluar();
+            break;
+        default:
+            pesanPilihanError(pilihan);
+            break;
+        }
+
+        delete[] daftarTugas; // Menghapus dynamic variable daftarTugas setelah tidak digunakan agar tidak terjadi memory leak
+
+        if (pilihan != 6)
+            mulai();
+    }
+    else
     {
-    case 1:
-        tambahTugas();
-        break;
-    case 2:
-        lihatDaftarTugas();
-        break;
-    case 3:
-        editTugas();
-        break;
-    case 4:
-        hapusTugas();
-        break;
-    case 5:
-        tandaiSelesai();
-        break;
-    case 6:
-        simpanDanKeluar();
-        break;
-    default:
-        pesanPilihanError(pilihan);
-        break;
+        cout << endl
+             << "Data korup, mohon benahi secara manual!" << endl
+             << endl;
     }
-
-    if (pilihan != 6)
-        mulai();
 }
+
+/* End Fungsi Utama */
 
 int main()
 {

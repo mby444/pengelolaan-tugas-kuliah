@@ -1,4 +1,7 @@
-1|Ngoding|Pemrograman Dasar|01/01/2025|Tinggi|Belum Selesai
-2|Presentasi|Pancasila|03/04/2025|Sedang|Belum Selesai
-3|Tugas 1|Arkom|01/12/2024|Tinggi|Belum Selesai
-4|Myfeyre|Pifrog|23/12/2025|Rendah|Belum Selesai
+1|Project Study Case|Pemrograman Dasar|23/12/2024|Tinggi|Belum Selesai
+2|Membuat Prototype|IMK|01/01/2025|Tinggi|Belum Selesai
+3|Mengerjakan Tugas Bab 3|Matematika|25/12/2024|Tinggi|Belum Selesai
+4|Membuat Presentasi|Fisika Dasar|15/01/2025|Sedang|Belum Selesai
+5|Menyelesaikan Laporan Akhir|Kimia|30/12/2024|Rendah|Belum Selesai
+6|Membaca Buku Referensi|Sejarah|10/01/2025|Rendah|Selesai
+7|Latihan Soal|Matematika|20/01/2025|Sedang|Belum Selesai
